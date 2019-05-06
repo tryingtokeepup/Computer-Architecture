@@ -1,7 +1,10 @@
 #include "cpu.h"
 
 #define DATA_LEN 6
-
+#define LDI 0b10000010 // what goes here?
+#define NOP            // this is no-opp, why do we even need these?
+#define PRN 0b01000111 // pretty sure this is a print statement
+#define HLT 0b00000001 // i guess this is the HLT mechanism?
 /**
  * Load the binary bytes from a .ls8 source file into a RAM array
  */
@@ -45,6 +48,16 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 /**
  * Run the CPU
  */
+void cpu_ram_read(struct cpu *cpu, unsigned char address)
+{
+  return cpu->ram[address];
+}
+
+void cpu_ram_write(struct cpu *cpu, unsigned char address, unsigned char value)
+{
+  // do i need to use pointers here? yikes.
+  return cpu->ram[address] = value;
+}
 void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
@@ -66,21 +79,7 @@ void cpu_run(struct cpu *cpu)
  */
 void cpu_init(struct cpu *cpu)
 {
+  // make PC zero
+  cpu->pc = 0;
   // TODO: Initialize the PC and other special registers
 }
-
-// struct cpu
-// {
-//   unsigned int pc;
-//   unsigned char reg[8];
-//   unsigned char ram[128];
-// };
-
-// int main() {
-//   struct cpu *cpu;
-//   cpu = malloc(sizeof(cpu));
-//   cpu->pc = 0;
-//   memset(cpu->reg, 0, 3);
-
-//   return 0;
-// }
