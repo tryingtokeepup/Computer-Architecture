@@ -48,7 +48,7 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 /**
  * Run the CPU
  */
-void cpu_ram_read(struct cpu *cpu, unsigned char address)
+unsigned char cpu_ram_read(struct cpu *cpu, unsigned char address)
 {
   return cpu->ram[address];
 }
@@ -56,19 +56,46 @@ void cpu_ram_read(struct cpu *cpu, unsigned char address)
 void cpu_ram_write(struct cpu *cpu, unsigned char address, unsigned char value)
 {
   // do i need to use pointers here? yikes.
-  return cpu->ram[address] = value;
+  cpu->ram[address] = value;
 }
 void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
+  unsigned char IR, operandA, operandB;
 
   while (running)
   {
     // TODO
     // 1. Get the value of the current instruction (in address PC).
+    IR = cpu_ram_read(cpu, cpu->pc); // only works if cpu_ram_read is unsigned char, wonder why?
+
     // 2. Figure out how many operands this next instruction requires
+    // Requires two opperands
+    operandA = cpu_ram_read(cpu, cpu->pc + 1); // move up 1 in pc
+    operandB = cpu_ram_read(cpu, cpu->pc + 2); // move up 2 in pc
     // 3. Get the appropriate value(s) of the operands following this instruction
+    // ?? not sure...
     // 4. switch() over it to decide on a course of action.
+
+    switch (IR)
+    {
+    case LDI:
+      cpu->reg[operandA] = operandB;
+      cpu->pc += 3;
+      break;
+    case PRN:
+      printf("%d\n", cpu->reg[operandA]);
+      // printf("8\n");
+      cpu->pc += 2;
+      break;
+    case HLT:
+      printf("Quitting out. \n");
+      running = 0;
+      break;
+    default:
+      printf("Unknown instruction at %d: %d\n", cpu->pc, IR);
+      exit(1);
+    }
     // 5. Do whatever the instruction should do according to the spec.
     // 6. Move the PC to the next instruction.
   }
@@ -82,4 +109,7 @@ void cpu_init(struct cpu *cpu)
   // make PC zero
   cpu->pc = 0;
   // TODO: Initialize the PC and other special registers
+  memset(cpu->ram, 0, sizeof(cpu->ram));
+  memset(cpu->reg, 0, sizeof(cpu->reg));
+  // 7th register
 }
