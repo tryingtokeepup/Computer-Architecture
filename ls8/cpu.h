@@ -1,6 +1,9 @@
 #ifndef _CPU_H_
 #define _CPU_H_
-
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#define DATA_LEN 6
 // Holds all information about the CPU
 struct cpu
 {

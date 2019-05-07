@@ -1,13 +1,9 @@
 #include "cpu.h"
 
-#define DATA_LEN 6
-#define LDI 0b10000010 // what goes here?
-#define NOP            // this is no-opp, why do we even need these?
-#define PRN 0b01000111 // pretty sure this is a print statement
-#define HLT 0b00000001 // i guess this is the HLT mechanism?
 /**
  * Load the binary bytes from a .ls8 source file into a RAM array
  */
+
 void cpu_load(struct cpu *cpu)
 {
   char data[DATA_LEN] = {
@@ -33,17 +29,17 @@ void cpu_load(struct cpu *cpu)
 /**
  * ALU
  */
-void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
-{
-  switch (op)
-  {
-  case ALU_MUL:
-    // TODO
-    break;
+// void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
+// {
+//   switch (op)
+//   {
+//   case ALU_MUL:
+//     // TODO
+//     break;
 
-    // TODO: implement more ALU ops
-  }
-}
+//     // TODO: implement more ALU ops
+//   }
+// }
 
 /**
  * Run the CPU
@@ -51,6 +47,23 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 unsigned char cpu_ram_read(struct cpu *cpu, unsigned char address)
 {
   return cpu->ram[address];
+}
+
+void trace(struct cpu *cpu)
+{
+  printf("%02X | ", cpu->pc);
+
+  printf("%02X %02X %02X |",
+         cpu_ram_read(cpu, cpu->pc),
+         cpu_ram_read(cpu, cpu->pc + 1),
+         cpu_ram_read(cpu, cpu->pc + 2));
+
+  for (int i = 0; i < 8; i++)
+  {
+    printf(" %02X", cpu->reg[i]);
+  }
+
+  printf("\n");
 }
 
 void cpu_ram_write(struct cpu *cpu, unsigned char address, unsigned char value)
@@ -76,7 +89,6 @@ void cpu_run(struct cpu *cpu)
     // 3. Get the appropriate value(s) of the operands following this instruction
     // ?? not sure...
     // 4. switch() over it to decide on a course of action.
-
     switch (IR)
     {
     case LDI:
