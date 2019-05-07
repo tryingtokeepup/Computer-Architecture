@@ -4,26 +4,45 @@
  * Load the binary bytes from a .ls8 source file into a RAM array
  */
 
-void cpu_load(struct cpu *cpu)
+void cpu_load(struct cpu *cpu, char *filename)
 {
-  char data[DATA_LEN] = {
-      // From print8.ls8
-      0b10000010, // LDI R0,8
-      0b00000000,
-      0b00001000,
-      0b01000111, // PRN R0
-      0b00000000,
-      0b00000001 // HLT
-  };
+  // char data[DATA_LEN] = {
+  //     // From print8.ls8
+  //     0b10000010, // LDI R0,8
+  //     0b00000000,
+  //     0b00001000,
+  //     0b01000111, // PRN R0
+  //     0b00000000,
+  //     0b00000001 // HLT
+  // };
 
+  // int address = 0;
+
+  // for (int i = 0; i < DATA_LEN; i++)
+  // {
+  //   cpu->ram[address++] = data[i];
+  // }
+  FILE *fp;
+  char line[1024];
   int address = 0;
-
-  for (int i = 0; i < DATA_LEN; i++)
+  fp = fopen(filename, "r");
+  if (fp == NULL)
   {
-    cpu->ram[address++] = data[i];
+    fprintf(stderr, "readfile: error opening file\n");
+    exit(1);
   }
 
-  // TODO: Replace this with something less hard-coded
+  while (fgets(line, 1024, fp) != NULL)
+  {
+    //printf("%s", line);
+
+    unsigned char val = strtoul(line, NULL, 2);
+
+    printf("%u\n", val);
+    cpu->ram[address++] = val;
+  }
+
+  fclose(fp);
 }
 
 /**
@@ -81,35 +100,38 @@ void cpu_run(struct cpu *cpu)
     // TODO
     // 1. Get the value of the current instruction (in address PC).
     IR = cpu_ram_read(cpu, cpu->pc); // only works if cpu_ram_read is unsigned char, wonder why?
+    int add_to_pc = (IR >> 6) + 1;
 
     // 2. Figure out how many operands this next instruction requires
-    // Requires two opperands
-    operandA = cpu_ram_read(cpu, cpu->pc + 1); // move up 1 in pc
-    operandB = cpu_ram_read(cpu, cpu->pc + 2); // move up 2 in pc
-    // 3. Get the appropriate value(s) of the operands following this instruction
-    // ?? not sure...
+
+    operandA = cpu_ram_read(cpu, (cpu->pc + 1)) & 0xff; // masking with and mask
+    operandB = cpu_ram_read(cpu, (cpu->pc + 2)) & 0xff; // if pc > 0xff, we mask it
+
     // 4. switch() over it to decide on a course of action.
     switch (IR)
     {
     case LDI:
       cpu->reg[operandA] = operandB;
-      cpu->pc += 3;
+      //cpu->pc += 3;
       break;
     case PRN:
       printf("%d\n", cpu->reg[operandA]);
       // printf("8\n");
-      cpu->pc += 2;
+      //cpu->pc += 2;
       break;
     case HLT:
       printf("Quitting out. \n");
       running = 0;
       break;
+    case MUL:
+      cpu->reg[operandA] = cpu->reg[operandA] * cpu->reg[operandB];
+      break;
     default:
       printf("Unknown instruction at %d: %d\n", cpu->pc, IR);
       exit(1);
     }
-    // 5. Do whatever the instruction should do according to the spec.
     // 6. Move the PC to the next instruction.
+    cpu->pc += add_to_pc;
   }
 }
 
