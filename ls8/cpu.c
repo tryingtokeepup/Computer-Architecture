@@ -114,9 +114,15 @@ void cpu_run(struct cpu *cpu)
       break;
     case POP:
       //cpu->reg[operandA]
+      cpu->reg[operandA] = cpu_ram_read(cpu, cpu->reg[7]);
+
+      cpu->reg[7]++;
+      //printf("popped value: %d\n", cpu->ram[operandA]);
       break;
     case PUSH:
       // decrement the sp by 1
+      cpu->reg[7]--;
+      cpu_ram_write(cpu, cpu->reg[7], cpu->reg[operandA]);
       break;
     default:
       printf("Unknown instruction at %d: %d\n", cpu->pc, IR);
