@@ -9,6 +9,7 @@ struct cpu
 {
   // TODO
   unsigned int pc;
+  unsigned int fl;
   unsigned char reg[8];
   unsigned char ram[128];
 };
@@ -29,6 +30,8 @@ enum alu_op
 #define HLT 0b00000001
 #define PRN 0b01000111
 #define MUL 0b10100010
+#define POP 0b01000110
+#define PUSH 0b01000101
 // TODO: more instructions here. These can be used in cpu_run().
 
 // Function declarations

@@ -6,22 +6,7 @@
 
 void cpu_load(struct cpu *cpu, char *filename)
 {
-  // char data[DATA_LEN] = {
-  //     // From print8.ls8
-  //     0b10000010, // LDI R0,8
-  //     0b00000000,
-  //     0b00001000,
-  //     0b01000111, // PRN R0
-  //     0b00000000,
-  //     0b00000001 // HLT
-  // };
 
-  // int address = 0;
-
-  // for (int i = 0; i < DATA_LEN; i++)
-  // {
-  //   cpu->ram[address++] = data[i];
-  // }
   FILE *fp;
   char line[1024];
   int address = 0;
@@ -127,6 +112,12 @@ void cpu_run(struct cpu *cpu)
       //cpu->reg[operandA] = cpu->reg[operandA] * cpu->reg[operandB];
       alu(cpu, ALU_MUL, operandA, operandB);
       break;
+    case POP:
+      //cpu->reg[operandA]
+      break;
+    case PUSH:
+      // decrement the sp by 1
+      break;
     default:
       printf("Unknown instruction at %d: %d\n", cpu->pc, IR);
       exit(1);
@@ -142,9 +133,14 @@ void cpu_run(struct cpu *cpu)
 void cpu_init(struct cpu *cpu)
 {
   // make PC zero
-  cpu->pc = 0;
   // TODO: Initialize the PC and other special registers
+
+  cpu->pc = 0;
+  cpu->fl = 0;
+  // clear RAM to 0
   memset(cpu->ram, 0, sizeof(cpu->ram));
-  memset(cpu->reg, 0, sizeof(cpu->reg));
+  //R0-R6 are cleared to 0.
+  memset(cpu->reg, 0, sizeof(cpu->reg) - 1);
   // 7th register
+  cpu->reg[7] = 0xF4;
 }
