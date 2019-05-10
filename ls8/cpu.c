@@ -41,8 +41,29 @@ void cpu_load(struct cpu *cpu, char *filename)
  */
 void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
 {
+  //stretch: Add the ALU operations: `AND` `OR` `XOR` `NOT` `SHL` `SHR` `MOD`
   switch (op)
   {
+  case ALU_AND:
+    // i guess we just check to see if they are ... both 1? otherwise, make them 0
+    // if (cpu->reg[regA] == 1 && cpu->reg[regB] == 1)
+    // {
+
+    //   cpu->reg[regA] == 1;
+    // }
+    // else
+    // {
+    //   cpu->reg[regA] == 0;
+    // }
+    // maybe this works too?
+    cpu->reg[regA] = cpu->reg[regA] & cpu->reg[regB];
+    break;
+  case ALU_OR:
+    cpu->reg[regA] = cpu->reg[regA] | cpu->reg[regB];
+  case ALU_XOR:
+    cpu->reg[regA] = cpu->reg[regA] ^ cpu->reg[regB];
+  case ALU_NOT:
+    cpu->reg[regA] = ~(cpu->reg[regA]);
   case ALU_MUL:
     cpu->reg[regA] = cpu->reg[regA] * cpu->reg[regB];
     break;
@@ -55,7 +76,7 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     if (cpu->reg[regA] == cpu->reg[regB])
     {
       cpu->fl = 1;
-      printf("fl is set to equal: %d\n", cpu->fl);
+      //printf("fl is set to equal: %d\n", cpu->fl);
     }
 
     break;
@@ -123,7 +144,7 @@ void cpu_run(struct cpu *cpu)
       break;
     case JNE:
       e_flag = cpu->fl << 7;
-      printf("JNE is: %d\n", e_flag);
+      //printf("JNE is: %d\n", e_flag);
       if (e_flag == 0)
       {
         cpu->pc = cpu->reg[operandA] - add_to_pc;
@@ -195,7 +216,7 @@ void cpu_run(struct cpu *cpu)
       cpu_ram_write(cpu, cpu->reg[7], cpu->reg[operandA]);
       break;
     default:
-      printf("Unknown instruction at %d: %d\n", cpu->pc, IR);
+      //printf("Unknown instruction at %d: %d\n", cpu->pc, IR);
       exit(1);
     }
     // 6. Move the PC to the next instruction.
