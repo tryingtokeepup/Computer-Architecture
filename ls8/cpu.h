@@ -11,13 +11,14 @@ struct cpu
   unsigned int pc;
   unsigned int fl;
   unsigned char reg[8];
-  unsigned char ram[128];
+  unsigned char ram[256];
 };
 
 // ALU operations
 enum alu_op
 {
-  ALU_MUL
+  ALU_MUL,
+  ALU_ADD
   // Add more here
 };
 
@@ -32,6 +33,9 @@ enum alu_op
 #define MUL 0b10100010
 #define POP 0b01000110
 #define PUSH 0b01000101
+#define CALL 0b01010000
+#define RET 0b00010001
+#define ADD 0b10100000
 // TODO: more instructions here. These can be used in cpu_run().
 
 // Function declarations
