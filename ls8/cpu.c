@@ -10,6 +10,7 @@ void cpu_load(struct cpu *cpu, char *filename)
   FILE *fp;
   char line[1024];
   int address = 0;
+  char *endpointer;
   fp = fopen(filename, "r");
   if (fp == NULL)
   {
@@ -21,9 +22,14 @@ void cpu_load(struct cpu *cpu, char *filename)
   {
     //printf("%s", line);
 
-    unsigned char val = strtoul(line, NULL, 2);
-
-    printf("%u\n", val);
+    unsigned char val = strtoul(line, &endpointer, 2);
+    // FOUR FUCKING HOURS
+    //printf("%u\n", val);
+    if (endpointer == line)
+    {
+      printf("hey, this line is ... not an instruction. %s \n", endpointer);
+      continue;
+    }
     cpu->ram[address++] = val;
   }
 
@@ -42,7 +48,7 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     break;
   case ALU_ADD:
     cpu->reg[regA] = cpu->reg[regA] + cpu->reg[regB];
-    // TODO: implement more ALU ops
+    printf("Add worked! %d \n", cpu->reg[regA]);
     break;
   default:
     exit(1);
@@ -90,7 +96,7 @@ void cpu_run(struct cpu *cpu)
     // 1. Get the value of the current instruction (in address PC).
     IR = cpu_ram_read(cpu, cpu->pc); // only works if cpu_ram_read is unsigned char, wonder why?
     int add_to_pc = (IR >> 6) + 1;
-
+    printf("PC is currently: %d\n", cpu->pc);
     // 2. Figure out how many operands this next instruction requires
 
     operandA = cpu_ram_read(cpu, (cpu->pc + 1)) & 0xff; // masking with and mask
@@ -103,17 +109,22 @@ void cpu_run(struct cpu *cpu)
       //next_addr = pc + 2;
       // decrement the stack pointer by one
       cpu->reg[7]--;
+      printf("yo, i'm still alive. 1 \n");
       // cpu_ram_write -> i need to write the current PC location into ram
       // where is the pc right now? cpu->pc i hate
       // cpu->reg[7] == 243? probably
       cpu_ram_write(cpu, cpu->reg[7], cpu->pc + add_to_pc);
       // call the process pointer? program counter
       cpu->pc = cpu->reg[operandA] - add_to_pc;
+      printf("yo, i'm still alive. 2 \n");
+
       break;
     case RET:
       //pop the value from the top of the stack and store it in the PC
-      cpu->pc = cpu_ram_read(cpu, cpu->reg[7]) - add_to_pc; // this points to the address on the stack that i have to pop
-      cpu->reg[7]++;                                        // emulate the pop by interating upwards by 1
+      cpu->pc = cpu_ram_read(cpu, cpu->reg[7]) - add_to_pc;
+      printf("yo, i'm still alive. 3 \n");
+      // this points to the address on the stack that i have to pop
+      cpu->reg[7]++; // emulate the pop by interating upwards by 1
       break;
     case LDI:
       cpu->reg[operandA] = operandB;
@@ -133,6 +144,7 @@ void cpu_run(struct cpu *cpu)
       alu(cpu, ALU_MUL, operandA, operandB);
       break;
     case ADD:
+      printf("Case ADD successfully hit! \n");
       alu(cpu, ALU_ADD, operandA, operandB);
       break;
     case POP:
