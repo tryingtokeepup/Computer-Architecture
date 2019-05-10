@@ -50,6 +50,15 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     cpu->reg[regA] = cpu->reg[regA] + cpu->reg[regB];
     printf("Add worked! %d \n", cpu->reg[regA]);
     break;
+  case ALU_CMP:
+    cpu->fl = 0;
+    if (cpu->reg[regA] == cpu->reg[regB])
+    {
+      cpu->fl = 1;
+      printf("fl is set to equal: %d\n", cpu->fl);
+    }
+
+    break;
   default:
     exit(1);
   }
@@ -88,7 +97,7 @@ void cpu_ram_write(struct cpu *cpu, unsigned char address, unsigned char value)
 void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
-  unsigned char IR, operandA, operandB;
+  unsigned char IR, operandA, operandB, e_flag;
 
   while (running)
   {
@@ -96,7 +105,7 @@ void cpu_run(struct cpu *cpu)
     // 1. Get the value of the current instruction (in address PC).
     IR = cpu_ram_read(cpu, cpu->pc); // only works if cpu_ram_read is unsigned char, wonder why?
     int add_to_pc = (IR >> 6) + 1;
-    printf("PC is currently: %d\n", cpu->pc);
+    //printf("PC is currently: %d\n", cpu->pc);
     // 2. Figure out how many operands this next instruction requires
 
     operandA = cpu_ram_read(cpu, (cpu->pc + 1)) & 0xff; // masking with and mask
@@ -105,6 +114,32 @@ void cpu_run(struct cpu *cpu)
     // 4. switch() over it to decide on a course of action.
     switch (IR)
     {
+    case CMP:
+      alu(cpu, ALU_CMP, operandA, operandB);
+      break;
+    case JMP:
+      // jump to the address stored in given register by setting the pc to that address!
+      cpu->pc = cpu->reg[operandA] - add_to_pc;
+      break;
+    case JNE:
+      e_flag = cpu->fl << 7;
+      printf("JNE is: %d\n", e_flag);
+      if (e_flag == 0)
+      {
+        cpu->pc = cpu->reg[operandA] - add_to_pc;
+      }
+      //printf("reg2 is: %d\n", cpu->reg[operandA]);
+      break;
+    case JEQ:
+      //if the E flag is clear, or not equal to 1, jump to the address stored in register
+
+      e_flag = cpu->fl << 7;
+      //printf("e_flag is: %d\n", e_flag);
+      if (cpu->fl == 1)
+      {
+        cpu->pc = cpu->reg[operandA] - add_to_pc;
+      }
+      break;
     case CALL:
       //next_addr = pc + 2;
       // decrement the stack pointer by one
