@@ -178,6 +178,7 @@ void cpu_init(struct cpu *cpu)
   // TODO: Initialize the PC and other special registers
 
   cpu->pc = 0;
+  // this is going to be our Equal flag
   cpu->fl = 0;
   // clear RAM to 0
   memset(cpu->ram, 0, 256 * sizeof(cpu->ram[0])); //R0-R6 are cleared to 0.
